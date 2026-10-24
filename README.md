@@ -1,25 +1,46 @@
+# OwnHost
 
-Installation information
-=======
+OwnHost is a standalone Minecraft hosting mod. It is separate from YardScout
+and is being built with a shared hosting core plus loader-specific adapters.
+The first adapter targets NeoForge for Minecraft 1.21.1.
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+## Hosting model
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+OwnHost publishes the host player's single-player world directly from their
+computer. It does not use LAN discovery and does not require a dedicated
+server. The host can use UPnP to request a port mapping, or configure the
+same port manually in their router. Friends connect using the public address
+and port.
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+The first release is intentionally direct-hosting only:
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+- It does not depend on a relay server.
+- The host can stop the published session when leaving the world.
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+Direct hosting requires a reachable public IPv4 address. Carrier-grade NAT,
+strict firewalls, and some school or cellular networks can prevent incoming
+connections; a future relay adapter can support those networks. The current
+Minecraft login protocol does not provide a safe place for a custom token
+before a connection is accepted, so OwnHost does not pretend its local
+session token is an access-control boundary. Use Minecraft's whitelist and
+router firewall while direct hosting is enabled.
+
+## Development
+
+Requirements:
+
+- Java 21
+- Minecraft 1.21.1
+- NeoForge 21.1.235
+
+Run the checks with:
+
+```powershell
+.\gradlew.bat build
+```
+
+Fabric and Forge support will use the same hosting contract with separate
+loader adapters. The loader-specific implementation is intentionally kept out
+of the shared lifecycle logic. A future relay/control protocol will add
+short-lived invite tokens and admission rate limits before the relay forwards
+Minecraft traffic.
