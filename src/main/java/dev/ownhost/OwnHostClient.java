@@ -73,6 +73,7 @@ public final class OwnHostClient {
     static void toggleHosting(Minecraft minecraft) {
         if (OwnHost.session().isRunning()) {
             OwnHost.session().stop();
+            OwnHost.closePort();
             minecraft.player.displayClientMessage(Component.literal("OwnHost stopped."), false);
             return;
         }
@@ -84,8 +85,9 @@ public final class OwnHostClient {
             return;
         }
         OwnHost.session().start();
+        UpnpPortMapping.Result portResult = OwnHost.openPort();
         minecraft.player.displayClientMessage(
-                Component.literal("OwnHost is live on port " + HOST_PORT + ". Configure your router/firewall, then share your public address."),
+                Component.literal("OwnHost is live on port " + HOST_PORT + ". " + portResult.message()),
                 false
         );
     }
