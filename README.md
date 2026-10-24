@@ -16,6 +16,8 @@ The first release is intentionally direct-hosting only:
 
 - It does not depend on a relay server.
 - The host can stop the published session when leaving the world.
+- NeoForge's normal login handshake checks that joining clients have the
+  required server-side mods and compatible versions.
 
 Direct hosting requires a reachable public IPv4 address. Carrier-grade NAT,
 strict firewalls, and some school or cellular networks can prevent incoming
@@ -24,6 +26,11 @@ Minecraft login protocol does not provide a safe place for a custom token
 before a connection is accepted, so OwnHost does not pretend its local
 session token is an access-control boundary. Use Minecraft's whitelist and
 router firewall while direct hosting is enabled.
+
+OwnHost does not download or execute mods from a host. Joining players must
+install the same Minecraft version, loader, and modpack through a trusted
+launcher. Fabric and Forge support require separate loader adapters; no single
+NeoForge JAR can load on those platforms.
 
 ## Development
 

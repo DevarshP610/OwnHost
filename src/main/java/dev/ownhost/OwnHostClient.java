@@ -5,12 +5,14 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.GameType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import org.lwjgl.glfw.GLFW;
 
@@ -40,36 +42,51 @@ public final class OwnHostClient {
         @SubscribeEvent
         public static void clientTick(ClientTickEvent.Post event) {
             Minecraft minecraft = Minecraft.getInstance();
-            if (minecraft.screen instanceof Screen || !HOST_WORLD.consumeClick()) {
+            if (minecraft.screen != null || !HOST_WORLD.consumeClick()) {
                 return;
             }
 
-            if (minecraft.getSingleplayerServer() == null || minecraft.player == null) {
+            openSetup(minecraft);
+        }
+
+        @SubscribeEvent
+        public static void addPauseMenuButton(ScreenEvent.Init.Post event) {
+            if (!(event.getScreen() instanceof net.minecraft.client.gui.screens.PauseScreen)) {
                 return;
             }
 
-            if (OwnHost.session().isRunning()) {
-                OwnHost.session().stop();
-                minecraft.player.displayClientMessage(Component.literal("OwnHost stopped."), false);
-                return;
-            }
+            event.addListener(Button.builder(
+                            Component.literal("Host with OwnHost"),
+                            ignored -> openSetup(Minecraft.getInstance())
+                    ).bounds(event.getScreen().width / 2 - 100, event.getScreen().height / 4 + 72, 200, 20)
+                    .build());
+        }
+    }
 
-            if (!minecraft.getSingleplayerServer().publishServer(GameType.SURVIVAL, false, HOST_PORT)) {
-                minecraft.player.displayClientMessage(
-                        Component.literal("OwnHost could not publish this world on port " + HOST_PORT + "."),
-                        false
-                );
-                return;
-            }
+    private static void openSetup(Minecraft minecraft) {
+        if (minecraft.getSingleplayerServer() == null || minecraft.player == null) {
+            return;
+        }
+        minecraft.setScreen(new OwnHostSetupScreen(minecraft.screen));
+    }
 
-            OwnHost.session().start();
+    static void toggleHosting(Minecraft minecraft) {
+        if (OwnHost.session().isRunning()) {
+            OwnHost.session().stop();
+            minecraft.player.displayClientMessage(Component.literal("OwnHost stopped."), false);
+            return;
+        }
+        if (!minecraft.getSingleplayerServer().publishServer(GameType.SURVIVAL, false, HOST_PORT)) {
             minecraft.player.displayClientMessage(
-                    Component.literal(
-                            "OwnHost is live on port " + HOST_PORT
-                                    + ". Configure your router/firewall, then share your public address."
-                    ),
+                    Component.literal("OwnHost could not publish this world on port " + HOST_PORT + "."),
                     false
             );
+            return;
         }
+        OwnHost.session().start();
+        minecraft.player.displayClientMessage(
+                Component.literal("OwnHost is live on port " + HOST_PORT + ". Configure your router/firewall, then share your public address."),
+                false
+        );
     }
 }
