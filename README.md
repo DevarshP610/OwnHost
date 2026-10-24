@@ -29,10 +29,10 @@ before a connection is accepted, so OwnHost does not pretend its local
 session token is an access-control boundary. Use Minecraft's whitelist and
 router firewall while direct hosting is enabled.
 
-If the router does not support UPnP, OwnHost still starts the world and tells
-the host to forward TCP port 25565 manually. UPnP should remain enabled only
-on a trusted home network; the router's firewall is still the boundary for
-internet traffic.
+If the router does not support UPnP, OwnHost still starts the world locally,
+but it cannot make that world reachable from the internet by itself. A
+zero-setup experience on those networks requires a relay/tunnel service; the
+current direct-hosting release does not bundle one.
 
 OwnHost does not download or execute mods from a host. Joining players must
 install the same Minecraft version, loader, and modpack through a trusted

@@ -55,10 +55,15 @@ public final class OwnHostClient {
                 return;
             }
 
+            int buttonWidth = 150;
             event.addListener(Button.builder(
-                            Component.literal("Host with OwnHost"),
+                            Component.literal(
+                                    OwnHost.session().isRunning()
+                                            ? "Stop OwnHost"
+                                            : "Host with OwnHost"
+                            ),
                             ignored -> openSetup(Minecraft.getInstance())
-                    ).bounds(event.getScreen().width / 2 - 100, event.getScreen().height / 4 + 72, 200, 20)
+                    ).bounds(event.getScreen().width - buttonWidth - 10, 10, buttonWidth, 20)
                     .build());
         }
     }
@@ -86,8 +91,12 @@ public final class OwnHostClient {
         }
         OwnHost.session().start();
         UpnpPortMapping.Result portResult = OwnHost.openPort();
+        String message = portResult.success()
+                ? "OwnHost is live on port " + HOST_PORT + ". " + portResult.message()
+                : "OwnHost started locally, but this network does not allow automatic internet access. "
+                        + "A relay mode is required for zero-setup hosting.";
         minecraft.player.displayClientMessage(
-                Component.literal("OwnHost is live on port " + HOST_PORT + ". " + portResult.message()),
+                Component.literal(message),
                 false
         );
     }
